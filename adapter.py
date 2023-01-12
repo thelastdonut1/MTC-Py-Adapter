@@ -21,10 +21,9 @@ class Adapter:
 
 
     def read_device(self):
-        # os.system('cls' if os.name == 'nt' else 'clear')  # clear terminal before printing
-        # while self.device.status == "running":
-        os.system('cls' if os.name == 'nt' else 'clear')  # clear terminal before printing
-        for i in range(self.device.num_outputs):
-            value = getattr(self.device, "output_" + str(i+1))
-            print("Value of output {} is {}".format(i+1, value))
-        time.sleep(1)
+        while self.device.status == "running":
+            os.system('cls' if os.name == 'nt' else 'clear')  # clear terminal before printing
+            for i in range(self.device.num_outputs):
+                value = getattr(self.device, "output_" + str(i+1))
+                print("Value of output {} is {}".format(i+1, value))
+            # time.sleep(1)

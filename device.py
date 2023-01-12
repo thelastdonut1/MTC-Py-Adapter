@@ -25,10 +25,11 @@ class Device:
         self.outputs_list = ['output_1', 'output_2', 'output_3', 'output_4', 'output_5', 'output_6', 'output_7', 'output_8']
 
     def shuffle_input(self):
+        while self.status == "running":
             i = random.randint(1, self.num_outputs) - 1
             value = self.outputs_list[i]
             setattr(self, value, random.randint(1,10))
-            # time.sleep(random.randint(1,5))
+            time.sleep(random.randint(1,5))
 
     # def shuffle_inputs(self):
     #     while self.status == "running":
