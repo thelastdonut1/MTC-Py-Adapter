@@ -31,13 +31,6 @@ class Device:
             setattr(self, value, random.randint(1,10))
             time.sleep(random.randint(1,5))
 
-    # def shuffle_inputs(self):
-    #     while self.status == "running":
-    #         i = random.randint(1, self.num_outputs) - 1
-    #         value = self.outputs_list[i]
-    #         setattr(self, value, random.randint(1,10))
-    #         time.sleep(random.randint(1,5))
-
     def change_status(self, status):
         valid_status = ["stopped", "paused", "running"]
         if status in valid_status:

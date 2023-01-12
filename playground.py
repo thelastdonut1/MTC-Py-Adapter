@@ -1,13 +1,13 @@
+# playground.py
+
+# File for experimenting with the adapter and device communcication and reading the output in the terminal
+
 import threading
 import device
 import adapter
 import time
 
 MTC_Adapter = adapter.Adapter('MyDevice', 8)
-
-# Will need to use threading. One thread to run the continuous shuffle inputs loop and one will perform the read_device method continuously.
-# MTC_Adapter.device.shuffle_input()
-# MTC_Adapter.read_device()
 
 # Using Threading:
 t1 = threading.Thread(target=MTC_Adapter.device.shuffle_input, args=()) 
@@ -16,9 +16,6 @@ t1.start()
 t2.start() 
 t1.join() 
 t2.join()
-
-
-
 
 
 # Filter Duplicates:

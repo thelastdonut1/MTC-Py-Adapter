@@ -26,4 +26,4 @@ class Adapter:
             for i in range(self.device.num_outputs):
                 value = getattr(self.device, "output_" + str(i+1))
                 print("Value of output {} is {}".format(i+1, value))
-            # time.sleep(1)
+            time.sleep(1)   # reads the device and outputs the result in terminal every 1 second
