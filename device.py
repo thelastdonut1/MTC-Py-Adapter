@@ -11,18 +11,14 @@ class Device:
     def __init__(self, name, outputs):
         self.name = name
         self.num_outputs = outputs
+        self.outputs_list = []
         self.status = "stopped"
 
-        self.output_1 = 0
-        self.output_2 = 0
-        self.output_3 = 0
-        self.output_4 = 0
-        self.output_5 = 0
-        self.output_6 = 0
-        self.output_7 = 0
-        self.output_8 = 0
+        for i in range(self.num_outputs):
+            setattr(self,'output_' + str(i+1), 0)
 
-        self.outputs_list = ['output_1', 'output_2', 'output_3', 'output_4', 'output_5', 'output_6', 'output_7', 'output_8']
+        for i in range(self.num_outputs):
+            self.outputs_list.append('output_' + str(i+1))
 
     def shuffle_input(self):
         while self.status == "running":

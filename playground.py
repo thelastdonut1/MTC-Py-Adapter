@@ -3,9 +3,7 @@
 # File for experimenting with the adapter and device communcication and reading the output in the terminal
 
 import threading
-import device
 import adapter
-import time
 
 MTC_Adapter = adapter.Adapter('MyDevice', 8)
 
