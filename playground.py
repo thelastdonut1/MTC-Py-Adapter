@@ -8,14 +8,11 @@ import adapter
 MTC_Adapter = adapter.Adapter('MyDevice', 8)
 
 # Using Threading:
-t1 = threading.Thread(target=MTC_Adapter.device.shuffle_input, args=()) 
-t2 = threading.Thread(target=MTC_Adapter.read_device, args=()) 
-t1.start() 
-t2.start() 
-t1.join() 
-t2.join()
+deviceThread = threading.Thread(target=MTC_Adapter.device.shuffle_input, args=()) 
+adapterThread = threading.Thread(target=MTC_Adapter.read_device, args=()) 
+deviceThread.start() 
+adapterThread.start() 
+deviceThread.join() 
+adapterThread.join()
 
-
-# Filter Duplicates:
-## Option in agent config file (in the adapter section)
-## Also possible to only send updated data items from the adapter by filtering on the adapter side
+# TODO: Create a branch from this project, one that uses multi-threading and one that uses multi-processing to determine which is the better option. Will need to have 3 threads or processes
