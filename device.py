@@ -14,7 +14,7 @@ class Device:
         self.status = "stopped"
 
         # Validates the number of device output channels specified
-        if outputs <= 12:
+        if outputs >= 12:
             print("Specified number of outputs is too large. Setting to the maximum number of outputs: 12")
             self.num_outputs = 12
         elif outputs < 1:
@@ -33,7 +33,7 @@ class Device:
 
     # Picks a random output to change the value of at a random interval between 1 and 5 seconds
     # Continuously loops while the device is running to simulate changes in the device output to be read by the adapter
-    def shuffle_input(self):
+    def shuffleInput(self):
         while self.status == "running":
             i = random.randint(1, self.num_outputs) - 1
             value = self.outputs_list[i]
@@ -41,7 +41,7 @@ class Device:
             time.sleep(random.randint(1,5))
 
     # Used to turn the device on or off and also as an attribute that can be reported to the adapter
-    def change_status(self, status):
+    def changeStatus(self, status):
         valid_status = ["stopped", "paused", "running"]
         if status in valid_status:
             self.status = status
