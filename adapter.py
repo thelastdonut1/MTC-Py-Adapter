@@ -33,7 +33,7 @@ class Adapter:
 
         self.SHDRString = self.formSHDRString()
 
-        self.port = 7879
+        self.port = 7878
         self.IPAddress = socket.gethostbyname(socket.gethostname())
         # self.IPAddress = 'localhost'
         # self.IPAddress = '172.26.83.77'
@@ -82,9 +82,8 @@ class Adapter:
         for data in self.adapterData:
             string = data.SHDRFormat()
             SHDRStringsList.append(string)
-        SHDRStringsList.append('\n')
         SHDRString = ''.join(SHDRStringsList)
-        self.SHDRString = SHDRString
+        self.SHDRString = SHDRString + '\n'
 
     # def createSocket(self):
     #     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -107,10 +106,9 @@ class Adapter:
 
     # Sends the data to the agent
     def sendToAgents(self):
-        if not self.socket.active_connections:
+        if self.socket.active_connections:
             data = self.SHDRString
             self.socket.send(data)
-            print(data)
             self.clean()
 
     def checkConnection(self):
