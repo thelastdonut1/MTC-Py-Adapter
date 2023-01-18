@@ -10,7 +10,10 @@ import device
 import time
 import datetime
 import socket
+
+import device
 import data
+import server
 
 class Adapter:
     def __init__(self, deviceName: str, numOfInputs = int(8)):     # Creates the adpater class with a defualt of 8 outputs
@@ -30,11 +33,14 @@ class Adapter:
 
         self.SHDRString = self.formSHDRString()
 
-        self.conn = ''
+        self.port = 7879
+        self.IPAddress = socket.gethostbyname(socket.gethostname())
+        # self.IPAddress = 'localhost'
+        # self.IPAddress = '172.26.83.77'
 
-        self.addr = ''
+        self.socket = server.Server(self.port, self.IPAddress)
 
-        self.socket = self.createSocket()
+        self.connected = False
 
     # TODO: Work on constructor for connecting an adapter to an existing device
     # def __init__(self, device: device):
@@ -76,18 +82,20 @@ class Adapter:
         for data in self.adapterData:
             string = data.SHDRFormat()
             SHDRStringsList.append(string)
+        SHDRStringsList.append('\n')
         SHDRString = ''.join(SHDRStringsList)
         self.SHDRString = SHDRString
 
-    def createSocket(self):
-        sock = socket.socket()
-        sock.bind(('localhost',7878))
-        sock.listen(1)
-        conn, addr = sock.accept()
-        self.conn = conn
-        agentData = conn.recv(1024)
-        print(str(agentData))
-        return sock
+    # def createSocket(self):
+    #     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #     sock.bind(self.ADDR)
+
+    #     sock.listen(1)
+    #     sock.accept()
+    #     self.conn = conn
+    #     agentData = conn.recv(1024)
+    #     print(str(agentData))
+    #     return sock
 
     # Sets the variables back to their default states
     def clean(self):
@@ -98,23 +106,30 @@ class Adapter:
         self.currentDataSample.clear()
 
     # Sends the data to the agent
-    def sendToAgent(self):
-        data = self.SHDRString.encode()
-        sock = self.socket
-        conn = self.conn
-        conn.send(data)
-        print(data)
-        self.clean()
+    def sendToAgents(self):
+        if not self.socket.active_connections:
+            data = self.SHDRString
+            self.socket.send(data)
+            print(data)
+            self.clean()
+
+    def checkConnection(self):
+        if self.socket.active_connections:
+            self.connected = True
+        else:
+            self.connected = False
 
     # Runs the adapter and performs the device reading, filtering, SHDR formation, and sending at a specified interval
     def run(self):
         while self.device.status == "running":
-            self.readDevice()
-            self.filterData()
-            self.formSHDRString()
-            self.sendToAgent()
-            time.sleep(5)   # Sets the time period between data sampling and sending
-
+            self.checkConnection()
+            while self.connected:
+                self.readDevice()
+                self.filterData()
+                self.formSHDRString()
+                self.sendToAgents()
+                time.sleep(5)   # Sets the time period between data sampling and sending
+                break
     # TODO: Add in the method that the adapter will use to map key value pairs to data items defined in the device file
 
     # TODO: Add in the method that the adapter will use to send data to agent using SHDR. Will need to use another thread
