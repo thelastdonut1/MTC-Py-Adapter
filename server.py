@@ -6,7 +6,7 @@ import time
 
 class Server:
     def __init__(self, port: int, ipAddress: str):
-        self.HEADER = 64
+        # self.HEADER = 64
         self.PORT = port
         self.SERVER = ipAddress
         self.ADDR = (self.SERVER, self.PORT)
@@ -15,9 +15,9 @@ class Server:
 
         self.MSGLENGTH: int = 1024
 
-        self.HEARTBEAT_RECIEVE_MSG: str = "* PING"
+        self.HEARTBEAT_RECIEVE_MSG: str = "* PING\n"
         self.HEARTBEAT_SEND_MSG: str = "* PONG"
-        self.HEARTBEAT_FREQUENCY: str = '100000'            #! Change this back
+        self.HEARTBEAT_FREQUENCY: str = '10000'
 
         self.socket: socket.socket = self.create_socket(self.ADDR)
 
@@ -31,7 +31,8 @@ class Server:
     def handle_client(self, conn, addr):
         print(f"[NEW CONNECTION] {addr} connected.")
 
-        timeout = (int(self.HEARTBEAT_FREQUENCY) / 1000) * 2
+        timeout = 100
+        #timeout = (int(self.HEARTBEAT_FREQUENCY) / 1000) * 2
         conn.settimeout(timeout)
 
         t = threading.Thread(target=self.send_pong, args=([conn, addr]))
@@ -70,13 +71,16 @@ class Server:
                 self.active_connections.remove((conn, addr))
                 print(f"[DISCONNECTED] Server did not receive a response from {addr}. Closing connection.")
 
+            #except connectionAbortedError
+
     #! Find a way to do this without starting an additional thread for every connection that is being "ponged"
     def send_pong(self, conn, addr):
         while (conn, addr) in self.active_connections:
             pong_msg = str(self.HEARTBEAT_SEND_MSG + '\n').encode(self.FORMAT)
             conn.send(pong_msg)
             print(f"[SERVER] {self.HEARTBEAT_SEND_MSG}")
-            time.sleep(10)
+            sleep_time = int(self.HEARTBEAT_FREQUENCY)/1000
+            time.sleep(sleep_time)
 
     def send(self, msg: str):
         data_message = msg.encode(self.FORMAT)
@@ -92,6 +96,14 @@ class Server:
         # self.socket.send(send_length)
         ###
 
+    def form_connection(self, conn, addr):
+        connect_msg = str(self.HEARTBEAT_SEND_MSG + ' ' + self.HEARTBEAT_FREQUENCY).encode(self.FORMAT)
+        conn.send(connect_msg)
+        print(f"[SERVER]->{addr}: {connect_msg.decode(self.FORMAT)}")
+        thread = threading.Thread(target=self.handle_client, args=(conn, addr))
+        thread.start()
+        self.active_connections.append((conn,addr))
+        print(f"[ACTIVE CONNECTIONS] {len(self.active_connections)}\n")
 
     def start(self):
         print("[STARTING] server is starting...")
@@ -99,10 +111,13 @@ class Server:
         self.socket.listen()
         while True:
             [conn, addr] = self.socket.accept()
-            connect_msg = str(self.HEARTBEAT_SEND_MSG + ' ' + self.HEARTBEAT_FREQUENCY).encode(self.FORMAT)
-            conn.send(connect_msg)
-            print(f"[SERVER]->{addr}: {connect_msg.decode(self.FORMAT)}")
-            thread = threading.Thread(target=self.handle_client, args=(conn, addr))
-            thread.start()
-            self.active_connections.append((conn,addr))
-            print(f"[ACTIVE CONNECTIONS] {len(self.active_connections)}\n")
+            ping = conn.recv(self.MSGLENGTH).decode(self.FORMAT)
+            if ping == self.HEARTBEAT_RECIEVE_MSG:
+                print(f"[{addr}]: {ping}")
+                print("[CONNECTED] Connected to MTC agent.")
+                self.form_connection(conn, addr)
+            elif ping:
+                print(f"[{addr}]: {ping}")
+                self.form_connection(conn, addr)
+
+

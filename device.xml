@@ -1,8 +1,23 @@
-<!-- device.xml -->
-
 <?xml version="1.0" encoding="UTF-8"?>
 <MTConnectDevices xmlns:m="urn:mtconnect.org:MTConnectDevices:1.7" xmlns="urn:mtconnect.org:MTConnectDevices:1.7" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:mtconnect.org:MTConnectDevices:1.7 http://schemas.mtconnect.org/schemas/MTConnectDevices_1.7.xsd">
 	<Header assetBufferSize="1024" assetCount="0" bufferSize="130000" instanceId="1" creationTime="2009-11-13T02:31:40" deviceModelChangeTime="2010-12-08T18:21:11Z" sender="local" version="1.5"/>
-    <Devices>
-        <Device id = "1" uuid = "00000000-0000-0000-0000-000000000000" name="Mazak">
-            <Description>Mazak</Description>
+	<Devices>
+		<Device id="d1" uuid="00000000-0000-0000-0000-000000000000" name="Mazak">
+			<Description>Virtual Device 1</Description>
+			<DataItems>
+				<DataItem category="SAMPLE" id="AO1" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO2" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO3" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO4" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO5" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO6" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO7" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO8" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO9" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO10" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO11" type="GENERAL"/>
+				<DataItem category="SAMPLE" id="AO12" type="GENERAL"/>
+			</DataItems>
+        </Device>
+    </Devices>
+</MTConnectDevices> 

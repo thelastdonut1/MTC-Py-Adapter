@@ -53,8 +53,6 @@ class Adapter:
             value = getattr(self.device, "output_" + str(i+1))  # Gets the attribute value corresponding to the output
 
             if key in self.adapterDataTemplate:
-                if key == "AO2":
-                    key = "Xpos"
                 outputData = data.Data(key, value)
                 self.currentDataSample.append(outputData)   # Updates the currentSampleData list will all of the current data objects from the device
 
