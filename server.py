@@ -99,8 +99,6 @@ class Server:
         del client
         t.join()
 
-
-    #! Find a way to do this without starting an additional thread for every connection that is being "ponged"
     def send_pong(self, client: Client):
         connect_msg = str(self.HEARTBEAT_SEND_MSG + ' ' + self.HEARTBEAT_FREQUENCY)
         connect_msg_enc = str(connect_msg + '\n').encode(self.FORMAT)
@@ -125,7 +123,6 @@ class Server:
 
     def send(self, msg: str):
         data_message = msg.encode(self.FORMAT)  # Message sent from the adapter to the server
-
         # Sends the data to all of the connected clients (agents)
         for client in self.active_connections:
             # TODO: Should probably find a better way of doing this
@@ -146,7 +143,7 @@ class Server:
     
     def identify_agent(self, client: Client, ping: str):
         """
-
+        Checks the response message sent back from the client. Determines whether it is an MTC Agent.
         """
         if ping == self.HEARTBEAT_RECIEVE_MSG:
             client.agent = True
@@ -160,16 +157,22 @@ class Server:
             self.form_connection(client)
 
     def form_connection(self, client: Client):
-        connect_msg = str(self.HEARTBEAT_SEND_MSG + ' ' + self.HEARTBEAT_FREQUENCY).encode(self.FORMAT)
-        client.conn.send(connect_msg)
+        """
+        Establishes the connection with the client and updates the list of connections.
+        """
+        # connect_msg = str(self.HEARTBEAT_SEND_MSG + ' ' + self.HEARTBEAT_FREQUENCY).encode(self.FORMAT)
+        # client.conn.send(connect_msg)
+        # print(f"[SERVER]->{client.cleanAddr}: {connect_msg.decode(self.FORMAT)}")
         client.connected = True
-        print(f"[SERVER]->{client.cleanAddr}: {connect_msg.decode(self.FORMAT)}")
         thread = threading.Thread(target=self.handle_client, args=([client]))
         thread.start()
         self.active_connections.append(client)
         print(f"[ACTIVE CONNECTIONS] {len(self.active_connections)}")
 
     def start(self):
+        """
+        Starts the adapter "server" to begin watching for connections and begins a thread for any new connection
+        """
         print("[STARTING] server is starting...")
         print(f"[LISTENING] Server is listening on {self.SERVER}")
         self.socket.listen()
