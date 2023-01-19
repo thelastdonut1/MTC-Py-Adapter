@@ -3,58 +3,74 @@
 import socket
 import threading
 import time
+from client import Client
 
 class Server:
+    '''
+     This class manages the sending of data to connected agents as well as the receiving and logging of information sent to the adapter
+    '''
     def __init__(self, port: int, ipAddress: str):
-        # self.HEADER = 64
+        '''
+        Constructs a server object.
+        
+        Args:
+            port: int 
+                port that the adapter data will be sent from
+            ipAddress: str
+                IP Address that adapter is located at
+        '''
+        self.HEADER = 64
+        self.FORMAT = 'utf-8'
+        self.DISCONNECT_MESSAGE = "!DISCONNECT"
+        self.MSGLENGTH: int = 1024
+
         self.PORT = port
         self.SERVER = ipAddress
         self.ADDR = (self.SERVER, self.PORT)
-        self.FORMAT = 'utf-8'
-        self.DISCONNECT_MESSAGE = "!DISCONNECT"
-
-        self.MSGLENGTH: int = 1024
 
         self.HEARTBEAT_RECIEVE_MSG: str = "* PING\n"
         self.HEARTBEAT_SEND_MSG: str = "* PONG"
         self.HEARTBEAT_FREQUENCY: str = '10000'
 
-        self.socket: socket.socket = self.create_socket(self.ADDR)
+        self.socket: socket = self.create_socket(self.ADDR)
 
-        self.active_connections: list(socket.socket) = []   #! Changed to a list of tuples. Need to be tested
+        self.active_connections: list = []
 
-    def create_socket(self, ADDR):
+    def create_socket(self, ADDR: tuple) -> (socket.socket):
+        """
+        Creates a socket object at the specified address
+
+        Args:
+            ADDR (tuple): ip address and port number
+
+        Returns:
+            socket: socket connection at specified address
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.bind(ADDR)
         return sock
 
-    def handle_client(self, conn, addr):
-        print(f"[NEW CONNECTION] {addr} connected.")
+    def handle_client(self, client: Client):
+        
+        # Sets the timeout counter for the socket to 2x the heartbeat frequency
+        timeout = (int(self.HEARTBEAT_FREQUENCY) / 1000) * 2
+        client.conn.settimeout(timeout)
 
-        timeout = 100
-        #timeout = (int(self.HEARTBEAT_FREQUENCY) / 1000) * 2
-        conn.settimeout(timeout)
-
-        t = threading.Thread(target=self.send_pong, args=([conn, addr]))
+        # Begins a thread for continually sending 'pong' to maintain connection with agent
+        t = threading.Thread(target=self.send_pong, args=([client]))
         t.start()
 
-        connected = True
-        while connected:
+        # Loops while the connection is established and records messages sent by the clients. Handles connection and timeout errors.
+        while client.connected:
             try:
-                #! Need exception handling for when the connection is closed
-                msg = conn.recv(self.MSGLENGTH)
+                msg = client.conn.recv(self.MSGLENGTH)
                 msg = msg.decode(self.FORMAT, errors='ignore')
-                # if msg != "* PING":
-                #     print("[DISCONNECTED]: Adapter received unexpected response from agent. Closing connection.")
-                #     self.active_connections.remove(conn)
-                #     connected - False
                 if msg == self.DISCONNECT_MESSAGE:
-                    print(f"[DISCONNECTED]: Closing connection to {addr}")
-                    self.active_connections.remove((conn, addr))
-                    connected = False
+                    client.close_connection()
+                    print(f"[DISCONNECTED]: Closing connection to {client.cleanAddr}")
                 else:
                     if msg:
-                        print(f"[{addr}] {msg}")
+                        print(f"[{client.cleanAddr}] {msg}")
 
                 ### * If messages from the agent are sent with a header of specified length
                 # msg_length = conn.recv(self.HEADER).decode(self.FORMAT)
@@ -65,29 +81,61 @@ class Server:
                 #         connected = False
                 #     print(f"[{addr}] {msg}")
                 ### *
-            except socket.timeout:
-                conn.close()
-                connected = False
-                self.active_connections.remove((conn, addr))
-                print(f"[DISCONNECTED] Server did not receive a response from {addr}. Closing connection.")
 
-            #except connectionAbortedError
+            except socket.timeout:
+                client.close_connection()
+                print(f"[DISCONNECTED] Server did not receive a response from {client.cleanAddr}. Closing connection.")
+                # client.conn.close()
+                # client.connected = False
+                # self.active_connections.remove(client)
+
+            except ConnectionError as e:
+                if e.errno == 10053:
+                    client.close_connection()
+                    print(f"[DISCONNECTED] Connection to {client.cleanAddr} was aborted")
+                    # client.conn.close()
+                    # client.connected = False
+                    # self.active_connections.remove(client)
+        del client
+        t.join()
+
 
     #! Find a way to do this without starting an additional thread for every connection that is being "ponged"
-    def send_pong(self, conn, addr):
-        while (conn, addr) in self.active_connections:
-            pong_msg = str(self.HEARTBEAT_SEND_MSG + '\n').encode(self.FORMAT)
-            conn.send(pong_msg)
-            print(f"[SERVER] {self.HEARTBEAT_SEND_MSG}")
-            sleep_time = int(self.HEARTBEAT_FREQUENCY)/1000
+    def send_pong(self, client: Client):
+        connect_msg = str(self.HEARTBEAT_SEND_MSG + ' ' + self.HEARTBEAT_FREQUENCY)
+        connect_msg_enc = str(connect_msg + '\n').encode(self.FORMAT)
+        pong_msg = str(self.HEARTBEAT_SEND_MSG)
+        pong_msg_enc = str(pong_msg + '\n').encode(self.FORMAT)
+
+        sleep_time = int(self.HEARTBEAT_FREQUENCY)/1000
+
+        while client in self.active_connections:
+            if client.new_connection:
+                client.conn.send(connect_msg_enc)
+                print(f"[SERVER]->[{client.cleanAddr}]: {connect_msg}")
+            else:
+                client.conn.send(pong_msg_enc)
+                print(f"[SERVER]->[{client.cleanAddr}]: {pong_msg}")
             time.sleep(sleep_time)
 
-    def send(self, msg: str):
-        data_message = msg.encode(self.FORMAT)
+    def initial_send(self, msg:str, client: Client):
+        time.sleep(1)
+        client.new_connection = False
+        self.send(msg)
 
-        for (conn, addr) in self.active_connections:
-            conn.send(data_message)
-            print(f"[SERVER]->{addr}: {data_message.decode(self.FORMAT)}")
+    def send(self, msg: str):
+        data_message = msg.encode(self.FORMAT)  # Message sent from the adapter to the server
+
+        # Sends the data to all of the connected clients (agents)
+        for client in self.active_connections:
+            # TODO: Should probably find a better way of doing this
+            if client.new_connection:   # Delays the initial send, otherwise the adapter sends to the agent before it is ready
+                t = threading.Thread(target=self.initial_send, args=([msg, client]))    # Creates a thread so the delay in sending to new connections does not hold up other clients in the active connections list
+                t.start()
+                t.join()
+            else:
+                client.conn.send(data_message)
+                print(f"[SERVER]->[{client.cleanAddr}]: {data_message.decode(self.FORMAT)}")
 
         ### If the message to the agent requires a header of a specified length
         # msg_length = len(message)
@@ -95,15 +143,31 @@ class Server:
         # send_length += b' ' * (self.HEADER - len(send_length))
         # self.socket.send(send_length)
         ###
+    
+    def identify_agent(self, client: Client, ping: str):
+        """
 
-    def form_connection(self, conn, addr):
+        """
+        if ping == self.HEARTBEAT_RECIEVE_MSG:
+            client.agent = True
+            print(f"[{client.cleanAddr}]: {ping}")
+            print(f"[NEW CONNECTION] MTC Agent at {client.ipAddr} connected.")
+            self.form_connection(client)
+        elif ping:
+            client.agent = False
+            print(f"[{client.cleanAddr}]: {ping}")
+            print(f"[NEW CONNECTION] MTC Agent at {client.ipAddr} connected.")
+            self.form_connection(client)
+
+    def form_connection(self, client: Client):
         connect_msg = str(self.HEARTBEAT_SEND_MSG + ' ' + self.HEARTBEAT_FREQUENCY).encode(self.FORMAT)
-        conn.send(connect_msg)
-        print(f"[SERVER]->{addr}: {connect_msg.decode(self.FORMAT)}")
-        thread = threading.Thread(target=self.handle_client, args=(conn, addr))
+        client.conn.send(connect_msg)
+        client.connected = True
+        print(f"[SERVER]->{client.cleanAddr}: {connect_msg.decode(self.FORMAT)}")
+        thread = threading.Thread(target=self.handle_client, args=([client]))
         thread.start()
-        self.active_connections.append((conn,addr))
-        print(f"[ACTIVE CONNECTIONS] {len(self.active_connections)}\n")
+        self.active_connections.append(client)
+        print(f"[ACTIVE CONNECTIONS] {len(self.active_connections)}")
 
     def start(self):
         print("[STARTING] server is starting...")
@@ -111,13 +175,9 @@ class Server:
         self.socket.listen()
         while True:
             [conn, addr] = self.socket.accept()
-            ping = conn.recv(self.MSGLENGTH).decode(self.FORMAT)
-            if ping == self.HEARTBEAT_RECIEVE_MSG:
-                print(f"[{addr}]: {ping}")
-                print("[CONNECTED] Connected to MTC agent.")
-                self.form_connection(conn, addr)
-            elif ping:
-                print(f"[{addr}]: {ping}")
-                self.form_connection(conn, addr)
+            connection = Client(conn, addr, self)
+            ping = conn.recv(self.MSGLENGTH).decode(self.FORMAT, errors='ignore') # Figure out a way to handle messages that are received not in utf-8 format
+            self.identify_agent(connection, ping)
+
 
 
