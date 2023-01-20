@@ -41,6 +41,8 @@ class Adapter:
 
         self.connected = False  # Indicates whether there are any active connections to the adapter
 
+        self.logger = None
+
     # TODO: Work on constructor for connecting an adapter to an existing device
     # def __init__(self, device: device):
     #     self.device = device
@@ -106,6 +108,7 @@ class Adapter:
 
     # Runs the adapter and performs the device reading, filtering, SHDR formation, and sending at a specified interval
     def run(self):
+        self.logger.info('Adapter has been started - 2')
         while self.device.status == "running":
             self.checkConnection()
             while self.connected:
