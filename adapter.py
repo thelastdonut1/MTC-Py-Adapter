@@ -6,6 +6,10 @@
 ### Status:
 # Creating a very simple start of the adapter to create a device object and read the output and print in the terminal
 
+#TODO: Implement an adapter.config (or potentially adapter.json) file that will be used to get some key settings for the adapter such as port, address, numOfInputs, deviceName, etc.
+
+import logging
+
 import time
 from datetime import datetime
 import socket
@@ -41,7 +45,8 @@ class Adapter:
 
         self.connected = False  # Indicates whether there are any active connections to the adapter
 
-        self.logger = None
+        #TODO: Add this attribute to all classes for easy logging
+        self.logger = logging.getLogger('adapterLog')
 
     # TODO: Work on constructor for connecting an adapter to an existing device
     # def __init__(self, device: device):

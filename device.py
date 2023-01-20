@@ -3,9 +3,10 @@
 ### Purpose:
 # Defines the class for the "device" object that has bewtween 1 and 12 outputs, with these outputs changing to a random integer between 1 and 10 every few seconds
 
+#TODO: Work on creating a longer list of attributes with condition and event items. The device should communicate its list of attributes to the Adapter object instead of using a list of the known device attributes as an Adapter attribute
+
 import random
 import time
-import datetime
 
 class Device:
     def __init__(self, name, outputs: int):

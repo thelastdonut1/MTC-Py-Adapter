@@ -9,3 +9,4 @@ To make a standalone adapter that can flip inputs and outputs, which can then be
 1. Replace the printing to terminal functionality with a logger. The logger needs to be able to recieve statements from the server, adapter, and other objects in order to have an all-encompassing detailed description of events in the adapter log file. The logger will have different levels of logging status and each message will be assigned to one of these levels, the most complex of which will give full-detailed descriptions of events as they happen, and the most basic of which will only report critical errors. The user should be able to configure their adapter logging settings in an adapter settings file.
 2. Create a GUI that users can use to interact with the adapter as it is running, as well as view and manage the connected "virtual devices".
 3. Refactor code so that everything can be exectuted by simply calling the adapter.run() method.
+4. See other TODO items in code...
