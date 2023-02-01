@@ -13,7 +13,7 @@ logger = logging.getLogger('adapterLog')
 
 # Creates the Adapter object
 #* Set to a default number of 8 objects with a device named 'MyDevice'. Need to have this file read adapter.config to extract arguments to pass to this function.
-MTC_Adapter = adapter.Adapter('MyDevice', 8)
+MTC_Adapter = adapter.Adapter('MyDevice', 12)
 
 # Using Threading:
 #TODO: Refactor code in adapter.py so that each of these threads are created when the Adapter.run() method is called
