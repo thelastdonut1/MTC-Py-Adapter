@@ -17,7 +17,7 @@ import socket
 from device import Device
 from data import Data
 from server import Server
-  
+
 class Adapter:
     def __init__(self, deviceName: str, numOfInputs = int(8)):     # Creates the adpater class with a defualt of 8 outputs
         self.device = Device(deviceName, numOfInputs)  # Creates a device object that the adapter will be linked to
