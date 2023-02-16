@@ -9,6 +9,7 @@
 #TODO: Implement an adapter.config (or potentially adapter.json) file that will be used to get some key settings for the adapter such as port, address, numOfInputs, deviceName, etc.
 
 import logging
+import logger as lggr
 
 import time
 from datetime import datetime
@@ -21,6 +22,7 @@ from server import Server
 class Adapter:
     def __init__(self, deviceName: str, numOfInputs = int(8)):     # Creates the adpater class with a defualt of 8 outputs
         self.device = Device(deviceName, numOfInputs)  # Creates a device object that the adapter will be linked to
+        self.version = "1.0.0.0"
         self.device.status = "running"
 
         self.previousDataSample: list[Data] = []   # Stores the data from the last time the device was sampled
@@ -111,9 +113,18 @@ class Adapter:
         else:
             self.connected = False
 
+    def startLog(self):
+        self.logger.info('New log has been started')
+        self.logger.info('Adapter Version: ' + self.version)
+
+
+
     # Runs the adapter and performs the device reading, filtering, SHDR formation, and sending at a specified interval
     def run(self):
-        self.logger.info('Adapter has been started - 2')
+        if lggr.checkLog(self.logger):
+            self.startLog()
+        
+        self.logger.info('Adapter has been started')
         while self.device.status == "running":
             self.checkConnection()
             while self.connected:

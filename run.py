@@ -2,14 +2,17 @@
 
 # File for executing the MTC Python Adapter application
 
+import logger
 import threading
 import adapter
 import logging
 
+logger.configureLogger()
+
 # Create the logger
 #* Finds the 'adapterLog' logger configured in logger.py (I do not know how) and uses these settings for the logger
 #* This means that to create the log, each object should have a self.logger attribute and it should be set to equal the statement below
-logger = logging.getLogger('adapterLog')
+appLog = logging.getLogger('adapterLog')
 
 # Creates the Adapter object
 #* Set to a default number of 8 objects with a device named 'MyDevice'. Need to have this file read adapter.config to extract arguments to pass to this function.
@@ -26,9 +29,9 @@ serverThread.start()
 
 # Tests for the logger object
 #TODO: Begin implementing logging statements in the code
-logger.debug('Device has been shuffled')
-logger.info('Adapter has been started')
-logger.error('Error connecting to server')
+# appLog.debug('Device has been shuffled')
+# appLog.info('Adapter has been started')
+# appLog.error('Error connecting to server')
 
 # Joins all the threads back into the main thread when they have completed
 deviceThread.join() 

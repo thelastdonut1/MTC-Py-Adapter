@@ -19,6 +19,7 @@ class Data:
     def __init__(self, key, value):
         self.key = key
         self.value = value
+        self.type = "Sample"
         self.has_changed = False
         self.SHDRString = ''
 

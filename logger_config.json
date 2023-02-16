@@ -1,0 +1,8 @@
+{
+    "level": "debug",
+    "filename": "Adapter_Log.log",
+    "filemode": "a",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "datefmt": "%m/%d/%Y %H:%M:%S %p"
+}
+

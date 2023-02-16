@@ -15,7 +15,7 @@ class Device:
         self.status = "stopped"
 
         # Validates the number of device output channels specified
-        if outputs >= 12:
+        if outputs > 12:
             print("Specified number of outputs is too large. Setting to the maximum number of outputs: 12")
             self.num_outputs = 12
         elif outputs < 1:
