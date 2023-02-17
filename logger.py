@@ -8,6 +8,7 @@
  
 #TODO: Explore more logging settings and find out how to append a specific string to the log when a new log file is created. Find a way to pull the configuration settings for the logger object from a logger.config file that will be placed in the application folder.
 import logging
+import string
 import json
 import os
 
@@ -31,7 +32,7 @@ A serious error, indicating that the program itself may be unable to continue ru
 '''
 def configureLogger():
         
-    defaults = {"level": "debug", 
+    DEFAULTS = {"level": "debug", 
                 "filename": "Adapter_Log.log", 
                 "filemode": "a", 
                 "format": "%(asctime)s - %(levelname)s - %(message)s", 
@@ -45,8 +46,8 @@ def configureLogger():
     except FileNotFoundError:
         # Logger config file was not found. Create a new config file using the default settings
             with open('logger_config.json', 'w') as f:
-                json.dump(defaults, f, indent=4)
-                settings = defaults
+                json.dump(DEFAULTS, f, indent=4)
+                settings = DEFAULTS
         
 
     
@@ -62,13 +63,28 @@ def configureLogger():
     logger = logging.getLogger('adapterLog')
 
     # Set the logging level
-    logger.setLevel(level.upper())
+    try:
+        logger.setLevel(level.upper())
+    except ValueError:
+        logger.warn(f'Invalid logging level: {level}. Setting default level to INFO.')
+        logger.setLevel('INFO')
 
     # Create a file handler
-    file_handler = logging.FileHandler(filename, filemode)
+    if not validateFileName(filename):
+        filename = DEFAULTS['filename']
+    try:
+        file_handler = logging.FileHandler(filename, filemode)
+    except ValueError:
+        logger.warn(f'Invalid file mode: {filemode}. Setting default file mode to append.')
+        filemode = DEFAULTS['filemode']
+        file_handler = logging.FileHandler(filename, filemode)
 
     # Set the log format
-    formatter = logging.Formatter(format, datefmt)
+    try:
+        formatter = logging.Formatter(format, datefmt)
+    except Exception:
+        #TODO
+        pass
 
     # Set the file handler's format
     file_handler.setFormatter(formatter)
@@ -84,7 +100,7 @@ def configureLogger():
     #                          filename= filename,
     #                          filemode= filemode)
 
-def checkLog(lgr: logging.Logger) -> bool:
+def logFileExists(lgr: logging.Logger) -> bool:
     filename = ""
     for handler in lgr.handlers:
         if isinstance(handler, logging.FileHandler):
@@ -95,6 +111,31 @@ def checkLog(lgr: logging.Logger) -> bool:
         return True
     else:
         return False
+    
+def startNewLog(adapter):
+    lgr = adapter.logger
+    lgr.info('New log created.')
+    lgr.info(f'Adapter Version: {adapter.version}')
+
+def validateLevel(level: str):
+    VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
+    if level.upper() not in VALID_LOG_LEVELS:
+        raise ValueError
+
+def validateFileName(file_name: str):
+    """
+    Validates a file name based on the following criteria:
+    - The file name must not be empty.
+    - The file name must not contain any of the following characters: \ / : * ? " < > |
+    - The file name must not start or end with a period.
+    """
+    if not file_name:
+        return False
+    if any(c in file_name for c in r'\/:*?"<>|'):
+        return False
+    if file_name.startswith('.') or file_name.endswith('.'):
+        return False
+    return True
 
 if __name__ == '__main__':
     # logger.py executed as script

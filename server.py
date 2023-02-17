@@ -1,6 +1,6 @@
 # server.py
 
-import logger
+import logging
 import socket
 import threading
 import time
@@ -37,6 +37,8 @@ class Server:
 
         self.active_connections: list = []
 
+        self.logger = logging.getLogger("adapterLog")
+
     def create_socket(self, ADDR: tuple) -> (socket.socket):
         """
         Creates a socket object at the specified address
@@ -47,9 +49,12 @@ class Server:
         Returns:
             socket: socket connection at specified address
         """
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(ADDR)
-        return sock
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.bind(ADDR)
+            return sock
+        except socket.error as e:
+            self.logger.warn
 
     def handle_client(self, client: Client):
         
