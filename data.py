@@ -19,13 +19,19 @@ class Data:
     def __init__(self, key, value):
         self.key = key
         self.value = value
-        self.type = "Sample"
+
+        self.values = [value]
+
+        self.dataItemType = "Sample"
+        
         self.has_changed = False
+        
         self.SHDRString = ''
 
     def update(self, newValue):
-        self.value = newValue
-        self.has_changed = True
+        if newValue != self.value:
+            self.value = newValue
+            self.has_changed = True
 
     def SHDRFormat(self):
         SHDRString = "|" + self.key + "|" + str(self.value)
