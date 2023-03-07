@@ -8,7 +8,6 @@
  
 #TODO: Explore more logging settings and find out how to append a specific string to the log when a new log file is created. Find a way to pull the configuration settings for the logger object from a logger.config file that will be placed in the application folder.
 import logging
-import string
 import json
 import os
 
@@ -41,11 +40,14 @@ def configureLogger():
     
     # Read the settings from the config file
     try:
-        with open('logger_config.json','r') as f:
+        with open('logs/config/logger_config.json','r') as f:
             settings = json.load(f)
     except FileNotFoundError:
+        # Check if the 'logs/config' directory exists. If not, create it
+        if not os.path.exists('logs/config'):
+            os.makedirs('logs/config')
         # Logger config file was not found. Create a new config file using the default settings
-            with open('logger_config.json', 'w') as f:
+            with open('logs/config/logger_config.json', 'w') as f:
                 json.dump(DEFAULTS, f, indent=4)
                 settings = DEFAULTS
         
@@ -73,7 +75,11 @@ def configureLogger():
     if not validateFileName(filename):
         filename = DEFAULTS['filename']
     try:
-        file_handler = logging.FileHandler(filename, filemode)
+        # Create 'logs' directory in the current working directory if it does not exist
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+        # Create the file handler with the filename and directory
+        file_handler = logging.FileHandler(f'logs/{filename}', filemode)
     except ValueError:
         logger.warn(f'Invalid file mode: {filemode}. Setting default file mode to append.')
         filemode = DEFAULTS['filemode']
@@ -83,7 +89,10 @@ def configureLogger():
     try:
         formatter = logging.Formatter(format, datefmt)
     except Exception:
-        #TODO
+        logger.warn(f'Invalid format: {format} or date format: {datefmt}. Setting default format and date format.')
+        format = DEFAULTS['format']
+        datefmt = DEFAULTS['datefmt']
+        formatter = logging.Formatter(format, datefmt)
         pass
 
     # Set the file handler's format
@@ -113,9 +122,11 @@ def logFileExists(lgr: logging.Logger) -> bool:
         return False
     
 def startNewLog(adapter):
+    # Dumps adapter object information to the log
     lgr = adapter.logger
     lgr.info('New log created.')
     lgr.info(f'Adapter Version: {adapter.version}')
+    lgr.info(f'Adapter Name: {adapter.name}')
 
 def validateLevel(level: str):
     VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
