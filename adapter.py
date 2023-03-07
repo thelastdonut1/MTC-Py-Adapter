@@ -21,10 +21,15 @@ from server import Server
 
 class Adapter:
     def __init__(self, deviceName: str, numOfInputs: int = 8):     # Creates the adapter class with a defualt of 8 outputs
+        self.logger = logging.getLogger('adapterLog')
+        
         self.device = Device(deviceName, numOfInputs)  # Creates a device object that the adapter will be linked to
-        self.version = "1.0.0.0"
+        print("[STARTING] Creating virtual device...")
+        self.logger.info(f'Adapter connected to device: {self.device.name}') # Logs the creation of the device
         self.device.status = "running"
 
+        self.version = "1.0.0" # Adapter version number
+        
         self.previousDataSample: list[Data] = []   # Stores the data from the last time the device was sampled
         self.currentDataSample: list[Data] = []    # Stores the data from the most recent read of the device
 
@@ -42,7 +47,6 @@ class Adapter:
         self.connected = False  # Indicates whether there are any active connections to the adapter
 
         #TODO: Add this attribute to all classes for easy logging
-        self.logger = logging.getLogger('adapterLog')
 
     # Runs the adapter and performs the device reading, filtering, SHDR formation, and sending at a specified interval
     def run(self):
@@ -50,6 +54,7 @@ class Adapter:
         if lgr.logFileExists(self.logger):
             lgr.startNewLog(self)
         
+        print("[STARTING] Starting adapter...")
         self.logger.info('Adapter has been started.')
 
         while self.device.status == "running":

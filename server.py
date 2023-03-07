@@ -76,7 +76,7 @@ class Server:
                     print(f"[DISCONNECTED]: Closing connection to {client.cleanAddr}")
                 else:
                     if msg:
-                        print(f"[{client.cleanAddr}] {msg}")
+                        print(f"[{client.cleanAddr}]->[SERVER]: {msg}")
 
                 ### * If messages from the agent are sent with a header of specified length
                 # msg_length = conn.recv(self.HEADER).decode(self.FORMAT)
@@ -153,12 +153,12 @@ class Server:
         """
         if ping == self.HEARTBEAT_RECIEVE_MSG:
             client.agent = True
-            print(f"[{client.cleanAddr}]: {ping}")
+            print(f"[{client.cleanAddr}]->[SERVER]: {ping}")
             print(f"[NEW CONNECTION] MTC Agent at {client.ipAddr} connected.")
             self.form_connection(client)
         elif ping:
             client.agent = False
-            print(f"[{client.cleanAddr}]: {ping}")
+            print(f"[{client.cleanAddr}]->[SERVER]: {ping}")
             print(f"[NEW CONNECTION] MTC Agent at {client.ipAddr} connected.")
             self.form_connection(client)
 
@@ -179,7 +179,7 @@ class Server:
         """
         Starts the adapter "server" to begin watching for connections and begins a thread for any new connection
         """
-        print("[STARTING] server is starting...")
+        print("[STARTING] Server is starting...")
         print(f"[LISTENING] Server is listening on {self.SERVER}")
         self.socket.listen()
         while True:
