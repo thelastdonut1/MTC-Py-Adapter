@@ -1,8 +1,6 @@
-__pycache__/adapter.cpython-311.pyc
-__pycache__/client.cpython-311.pyc
-__pycache__/data.cpython-311.pyc
-__pycache__/device.cpython-311.pyc
-__pycache__/logger.cpython-311.pyc
-__pycache__/server.cpython-311.pyc
-Adapter_Log.log
-.vscode/launch.json
+src\__pycache__\server.cpython-311.pyc
+src\__pycache__\device.cpython-311.pyc
+src\__pycache__\logger.cpython-311.pyc
+src\__pycache__\data.cpython-311.pyc
+src\__pycache__\client.cpython-311.pyc
+src\__pycache__\adapter.cpython-311.pyc
