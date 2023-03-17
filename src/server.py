@@ -54,7 +54,7 @@ class Server:
             sock.bind(ADDR)
             return sock
         except socket.error as e:
-            self.logger.warn
+            self.logger.warn(f"Socket creation failed: {e}")
 
     def handle_client(self, client: Client):
         

@@ -6,7 +6,6 @@
 # If changes are made to this file, altering the logger configuration, the logger will not automatically be updated and any logs created using this logger will not reflect changes.
 # Therefore, this logger.py script must be run in the run.py file so the current configuration details will be registered
  
-#TODO: Explore more logging settings and find out how to append a specific string to the log when a new log file is created. Find a way to pull the configuration settings for the logger object from a logger.config file that will be placed in the application folder.
 import logging
 import json
 import os
@@ -29,7 +28,7 @@ Due to a more serious problem, the software has not been able to perform some fu
 CRITICAL:
 A serious error, indicating that the program itself may be unable to continue running.
 '''
-def configureLogger():
+def configureLogger() -> None:
         
     DEFAULTS = {"level": "debug", 
                 "filename": "Adapter_Log.log", 
@@ -121,19 +120,19 @@ def logFileExists(lgr: logging.Logger) -> bool:
     else:
         return False
     
-def startNewLog(adapter):
+def startNewLog(adapter) -> None:
     # Dumps adapter object information to the log
     lgr = adapter.logger
     lgr.info('New log created.')
     lgr.info(f'Adapter Version: {adapter.version}')
     lgr.info(f'Adapter Name: {adapter.name}')
 
-def validateLevel(level: str):
+def validateLevel(level: str) -> None:
     VALID_LOG_LEVELS = {'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'}
     if level.upper() not in VALID_LOG_LEVELS:
         raise ValueError
 
-def validateFileName(file_name: str):
+def validateFileName(file_name: str) -> bool:
     """
     Validates a file name based on the following criteria:
     - The file name must not be empty.

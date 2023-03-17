@@ -5,7 +5,8 @@ from socket import socket
 class Client:
     '''
     Class for holding details on the clients (agents) connected to the server.
-    Provides the socket and address, as well as information on whether the connection is an MTC Agent, if it has recently connected, and if the connection is active.
+    Provides the socket and address, as well as information on whether the connection is an MTC Agent, 
+    if it has recently connected, and if the connection is active.
     '''
     def __init__(self, conn, addr, server):
 
@@ -27,6 +28,10 @@ class Client:
         self.new_connection = True
 
     def close_connection(self):
+        '''
+        Closes the connection to the client and updates its connection status.
+        Also removes the client from the server's list of active connections.
+        '''
         self.conn.close()
         self.connected = False
         self.hostServer.active_connections.remove(self)

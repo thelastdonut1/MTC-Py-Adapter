@@ -21,9 +21,9 @@ MTC_Adapter = Adapter('MyDevice', 12)
 
 # Using Threading:
 #TODO: Refactor code in adapter.py so that each of these threads are created when the Adapter.run() method is called
-deviceThread = Thread(target=MTC_Adapter.device.shuffleInput, args=()) 
-adapterThread = Thread(target=MTC_Adapter.run, args=()) 
-serverThread = Thread(target=MTC_Adapter.socket.start, args=())
+deviceThread = Thread(target=MTC_Adapter.device.shuffleInput, args=(), name='Device Thread') 
+adapterThread = Thread(target=MTC_Adapter.run, args=(), name='Adapter Thread') 
+serverThread = Thread(target=MTC_Adapter.socket.start, args=(), name='Server Thread')
 deviceThread.start() 
 adapterThread.start() 
 serverThread.start()
