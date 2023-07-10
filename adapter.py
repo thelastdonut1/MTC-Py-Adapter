@@ -20,9 +20,8 @@ from data import Data
 from server import Server
 
 class Adapter:
-    def __init__(self, deviceName: str, numOfInputs = int(8)):     # Creates the adpater class with a defualt of 8 outputs
-        self.device = Device(deviceName, numOfInputs)  # Creates a device object that the adapter will be linked to
-        self.version = "1.0.0.0"
+    def __init__(self, device):
+        self.device = device # Creates a device object that the adapter will be linked to
         self.device.status = "running"
 
         self.previousDataSample: list[Data] = []   # Stores the data from the last time the device was sampled
@@ -30,17 +29,11 @@ class Adapter:
 
         self.adapterData: list[Data] = []  # Stores the filtered currentDataSample to only include data that has changed. Used to form SHDR string.
 
-        self.adapterDataTemplate = {"AO1": "UNAVAILABLE", "AO2": "UNAVAILABLE", "AO3": "UNAVAILABLE",
-                                 "AO4": "UNAVAILABLE", "AO5": "UNAVAILABLE", "AO6": "UNAVAILABLE",
-                                 "AO7": "UNAVAILABLE", "AO8": "UNAVAILABLE", "AO9": "UNAVAILABLE",
-                                 "AO10": "UNAVAILABLE", "AO11": "UNAVAILABLE", "AO12": "UNAVAILABLE"
-                                 }
-
         self.SHDRString = self.formSHDRString() # Forms the SHDR String for the data sample that will be sent to the agent
 
         self.port = 7878    # Port that the adapter will send data from
-        self.IPAddress = socket.gethostbyname(socket.gethostname()) # IP Adrress that the adapter will send data from
-        # self.IPAddress = 'localhost'
+        # self.IPAddress = socket.gethostbyname(socket.gethostname()) # IP Adrress that the adapter will send data from
+        self.IPAddress = 'localhost'
         # self.IPAddress = '172.26.83.77'
 
         self.socket = Server(self.port, self.IPAddress) # Socket at [IPAddress:Port]
@@ -56,13 +49,12 @@ class Adapter:
 
     # Reads the data that the device is outputting every 1 second and updates the adapterData dictionary with newest data sample
     def readDevice(self):
-        for i in range(self.device.num_outputs):
-            key = "AO" + str(i+1) # Assigns output a name according to the adapter data item naming convention
-            value = getattr(self.device, "output_" + str(i+1))  # Gets the attribute value corresponding to the output
-
-            if key in self.adapterDataTemplate:
-                outputData = Data(key, value)
-                self.currentDataSample.append(outputData)   # Updates the currentSampleData list will all of the current data objects from the device
+        data_attributes = dir(self.device)
+    
+        for attribute in data_attributes:
+            if not attribute.startswith('__') and not callable(getattr(self.device, attribute)):
+                data = Data(attribute, getattr(self.device, attribute))
+                self.currentDataSample.append(data)
 
     # Iterates through the current and previous sample data and records whether a data item's value has changed        
     def hasChanged(self):
@@ -85,6 +77,8 @@ class Adapter:
     def formSHDRString(self) -> str:
         SHDRTime = datetime.utcnow().isoformat() + "Z"
         SHDRStringsList = [SHDRTime]
+        if not self.adapterData:
+            return
         for data in self.adapterData:
             string = data.SHDRFormat()
             SHDRStringsList.append(string)
@@ -102,8 +96,9 @@ class Adapter:
     # Sends the data to the agent
     def sendToAgents(self):
         if self.socket.active_connections:
-            data = self.SHDRString
-            self.socket.send(data)
+            if self.SHDRString:
+                data = self.SHDRString
+                self.socket.send(data)
             self.clean()
 
     # Checks for any connections to the adapter. Changes connection status
@@ -116,8 +111,7 @@ class Adapter:
     def startLog(self):
         self.logger.info('New log has been started')
         self.logger.info('Adapter Version: ' + self.version)
-
-
+        # self.logger.info('')
 
     # Runs the adapter and performs the device reading, filtering, SHDR formation, and sending at a specified interval
     def run(self):

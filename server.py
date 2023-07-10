@@ -1,6 +1,6 @@
 # server.py
 
-import logger
+import logging
 import socket
 import threading
 import time
@@ -32,6 +32,8 @@ class Server:
         self.HEARTBEAT_RECIEVE_MSG: str = "* PING\n"
         self.HEARTBEAT_SEND_MSG: str = "* PONG"
         self.HEARTBEAT_FREQUENCY: str = '10000'
+
+        self.logger = logging.getLogger('adapterLog')
 
         self.socket: socket = self.create_socket(self.ADDR)
 
@@ -69,6 +71,7 @@ class Server:
                 if msg == self.DISCONNECT_MESSAGE:
                     client.close_connection()
                     print(f"[DISCONNECTED]: Closing connection to {client.cleanAddr}")
+                    self.logger.info('connection closed from' + {client.cleanAddr})          
                 else:
                     if msg:
                         print(f"[{client.cleanAddr}] {msg}")
@@ -86,6 +89,7 @@ class Server:
             except socket.timeout:
                 client.close_connection()
                 print(f"[DISCONNECTED] Server did not receive a response from {client.cleanAddr}. Closing connection.")
+                self.logger.info('Server timed out from' + {client.cleanAddr})
                 # client.conn.close()
                 # client.connected = False
                 # self.active_connections.remove(client)
@@ -93,6 +97,7 @@ class Server:
             except ConnectionError as e:
                 if e.errno == 10053:
                     client.close_connection()
+                    self.logger.info('server disconneded: connection error from' + {client.cleanAddr})
                     print(f"[DISCONNECTED] Connection to {client.cleanAddr} was aborted")
                     # client.conn.close()
                     # client.connected = False
@@ -182,6 +187,3 @@ class Server:
             connection = Client(conn, addr, self)
             ping = conn.recv(self.MSGLENGTH).decode(self.FORMAT, errors='ignore') # Figure out a way to handle messages that are received not in utf-8 format
             self.identify_agent(connection, ping)
-
-
-

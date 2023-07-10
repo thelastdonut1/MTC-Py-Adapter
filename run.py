@@ -6,6 +6,7 @@ import logger
 import threading
 import adapter
 import logging
+import device
 
 logger.configureLogger()
 
@@ -16,15 +17,16 @@ appLog = logging.getLogger('adapterLog')
 
 # Creates the Adapter object
 #* Set to a default number of 8 objects with a device named 'MyDevice'. Need to have this file read adapter.config to extract arguments to pass to this function.
-MTC_Adapter = adapter.Adapter('MyDevice', 12)
+MyPiTest = device.Device("Device")
+MTC_Adapter = adapter.Adapter(MyPiTest)
 
 # Using Threading:
 #TODO: Refactor code in adapter.py so that each of these threads are created when the Adapter.run() method is called
-deviceThread = threading.Thread(target=MTC_Adapter.device.shuffleInput, args=()) 
+deviceThread = threading.Thread(target=MTC_Adapter.device.run, args=()) 
 adapterThread = threading.Thread(target=MTC_Adapter.run, args=()) 
 serverThread = threading.Thread(target=MTC_Adapter.socket.start, args=())
-deviceThread.start() 
-adapterThread.start() 
+deviceThread.start()
+adapterThread.start()
 serverThread.start()
 
 # Tests for the logger object
