@@ -21,7 +21,7 @@ from server import Server
 
 class Adapter:
     def __init__(self, device):
-        self.device = device # Creates a device object that the adapter will be linked to
+        self.device = device # connects to the device object that the adapter will be linked to
         self.device.status = "running"
 
         self.previousDataSample: list[Data] = []   # Stores the data from the last time the device was sampled

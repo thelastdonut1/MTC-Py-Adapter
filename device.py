@@ -17,7 +17,8 @@ class Device:
         self.name = name
         self.version  = self.getVersion()
         self.user = self.getUser()
-        self.cursor = self.getCursor()
+        self.cursor = self.getCursorX()
+        self.cursorY = self.getCursorY()
         self.CPU = self.getCPU()
         self.battery = self.getBattery()
         
@@ -27,9 +28,13 @@ class Device:
         UserName = psutil.users()
         self.user = UserName[0].name
 
-    def getCursor(self):
+    def getCursorX(self):
         cursorPOS = pyautogui.position()
-        self.cursor = f"({cursorPOS.x},{cursorPOS.y})"
+        self.cursorX = cursorPOS.x
+
+    def getCursorY(self):
+        cursorPOS = pyautogui.position()
+        self.cursorY = cursorPOS.y
 
     def getVersion(self):
         verSet = platform.win32_ver()
@@ -46,7 +51,8 @@ class Device:
     def run(self):
         while True:
             self.getUser()
-            self.getCursor()
+            self.getCursorX()
+            self.getCursorY()
             self.getVersion()
             self.getCPU()
             self.getBattery()
