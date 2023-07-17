@@ -33,8 +33,8 @@ class Adapter:
 
         self.port = 7878    # Port that the adapter will send data from
         # self.IPAddress = socket.gethostbyname(socket.gethostname()) # IP Adrress that the adapter will send data from
-        self.IPAddress = 'localhost'
-        # self.IPAddress = '172.26.83.77'
+        # self.IPAddress = 'localhost'
+        self.IPAddress = '172.26.83.79'
 
         self.socket = Server(self.port, self.IPAddress) # Socket at [IPAddress:Port]
 
