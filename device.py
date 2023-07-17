@@ -18,68 +18,57 @@ import threading
 
 class Device:
     def __init__(self, name):
-        self.name = name
-        self.version  = self.getVersion()
-        self.user = self.getUser()
-        self.cursor = self.getCursorX()
-        self.cursorY = self.getCursorY()
-        self.CPU = self.getCPU()
-        self._display = SSDisplay( 16, 12, 19, 13, 26, 21, 20, active_high=False)
-        self.digit = self._display.AdapterSend
-        self._reader = readPotentiometer()
-        self.analog = self._reader.numRange
-        self.state = blink()
-        self.ON = self.state.LEDstate
-        # self.battery = self.getBattery()
-        
+        self.name = name                              # Set the name attribute to the provided name
+        self.version  = self.getVersion()             # Set the version attribute by calling the getVersion() method
+        self.user = self.getUser()                     # Set the user attribute by calling the getUser() method
+        self.cursor = self.getCursorX()                # Set the cursor attribute by calling the getCursorX() method
+        self.cursorY = self.getCursorY()               # Set the cursorY attribute by calling the getCursorY() method
+        self.CPU = self.getCPU()                       # Set the CPU attribute by calling the getCPU() method
+        self._display = SSDisplay(16, 12, 19, 13, 26, 21, 20, active_high=False)  # Create an instance of SSDisplay with specified pin numbers
+        self.digit = self._display.AdapterSend         # Set the digit attribute to the AdapterSend value of _display
+        self._reader = readPotentiometer()             # Create an instance of readPotentiometer
+        self.analog = self._reader.numRange            # Set the analog attribute to the numRange value of _reader
+        self.state = blink()                           # Create an instance of blink and assign it to the state attribute
+        self.ON = self.state.LEDstate                  # Set the ON attribute to the LEDstate value of state
 
     def shuffle_display(self):
         while True:
-            self._display.display(self.analog)
-            self.digit = self._display.AdapterSend
-            self.analog = self._reader.numRange
+            self._display.display(self.analog)          # Call the display method of _display with the analog attribute as an argument
+            self.digit = self._display.AdapterSend      # Set the digit attribute to the AdapterSend value of _display
+            self.analog = self._reader.numRange         # Set the analog attribute to the numRange value of _reader
             time.sleep(0.05)
 
-
     def getUser(self):
-        UserName = psutil.users()
-        self.user = UserName[0].name
+        UserName = psutil.users()                      # Get the currently logged-in user(s) information
+        self.user = UserName[0].name                   # Set the user attribute to the name of the first user
 
     def getCursorX(self):
-        cursorPOS = pyautogui.position()
-        self.cursorX = cursorPOS.x
+        cursorPOS = pyautogui.position()                # Get the current position of the cursor
+        self.cursorX = cursorPOS.x                      # Set the cursorX attribute to the x-coordinate of the cursor position
 
     def getCursorY(self):
-        cursorPOS = pyautogui.position()
-        self.cursorY = cursorPOS.y
+        cursorPOS = pyautogui.position()                # Get the current position of the cursor
+        self.cursorY = cursorPOS.y                      # Set the cursorY attribute to the y-coordinate of the cursor position
 
     def getVersion(self):
-        verSet = distro.linux_distribution()
-        self.version = verSet[1]
-        
+        verSet = distro.linux_distribution()            # Get the version information of the Linux distribution
+        self.version = verSet[1]                        # Set the version attribute to the second element of the version information
+
     def getCPU(self):
-        varCPU = psutil.cpu_percent()
-        self.CPU = varCPU
-
-    # def getBattery(self):
-    #     bat = psutil.sensors_battery()
-    #     self.battery = bat[0]
-
+        varCPU = psutil.cpu_percent()                    # Get the current CPU usage percentage
+        self.CPU = varCPU                                # Set the CPU attribute to the CPU usage percentage
 
     def run(self):
-        threadSSD = threading.Thread(target=self.shuffle_display, args=()) 
-        threadANA = threading.Thread(target=self._reader.run_analog, args=())
-        threadBLINK = threading.Thread(target=self.state.go_blink, args=())
-        threadSSD.start()
-        threadANA.start()
-        threadBLINK.start()
+        threadSSD = threading.Thread(target=self.shuffle_display, args=())   # Create a thread for shuffle_display method
+        threadANA = threading.Thread(target=self._reader.run_analog, args=()) # Create a thread for run_analog method of _reader
+        threadBLINK = threading.Thread(target=self.state.go_blink, args=())  # Create a thread for go_blink method of state
+        threadSSD.start()                                 # Start the thread for shuffle_display
+        threadANA.start()                                 # Start the thread for run_analog
+        threadBLINK.start()                               # Start the thread for go_blink
         while True:
-            self.getUser()
-            self.getCursorX()
-            self.getCursorY()
-            self.getVersion()
-            self.getCPU()
-            # self.getBattery()
-            time.sleep(5)
-       
-            
+            self.getUser()                                # Update the user attribute
+            self.getCursorX()                             # Update the cursorX attribute
+            self.getCursorY()                             # Update the cursorY attribute
+            self.getVersion()                             # Update the version attribute
+            self.getCPU()                                 # Update the CPU attribute
+            time.sleep(5)      
