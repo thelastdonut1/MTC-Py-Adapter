@@ -29,13 +29,14 @@ class Device:
         self._reader = readPotentiometer()             # Create an instance of readPotentiometer
         self.analog = self._reader.numRange            # Set the analog attribute to the numRange value of _reader
         self.state = blink()                           # Create an instance of blink and assign it to the state attribute
-        self.ON = self.state.LEDstate                  # Set the ON attribute to the LEDstate value of state
+        self.light_blink = self.state.LEDstate                  # Set the ON attribute to the LEDstate value of state
 
     def shuffle_display(self):
         while True:
             self._display.display(self.analog)          # Call the display method of _display with the analog attribute as an argument
             self.digit = self._display.AdapterSend      # Set the digit attribute to the AdapterSend value of _display
             self.analog = self._reader.numRange         # Set the analog attribute to the numRange value of _reader
+            self.light_blink = self.state.LEDstate
             time.sleep(0.05)
 
     def getUser(self):
@@ -61,7 +62,7 @@ class Device:
     def run(self):
         threadSSD = threading.Thread(target=self.shuffle_display, args=())   # Create a thread for shuffle_display method
         threadANA = threading.Thread(target=self._reader.run_analog, args=()) # Create a thread for run_analog method of _reader
-        threadBLINK = threading.Thread(target=self.state.go_blink, args=())  # Create a thread for go_blink method of state
+        threadBLINK = threading.Thread(target=self.state.run, args=())  # Create a thread for go_blink method of state
         threadSSD.start()                                 # Start the thread for shuffle_display
         threadANA.start()                                 # Start the thread for run_analog
         threadBLINK.start()                               # Start the thread for go_blink

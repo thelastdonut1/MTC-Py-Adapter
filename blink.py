@@ -58,11 +58,47 @@ class readPotentiometer():
             for (key, val) in self._rangeV.items():  # Iterate over the items in the _rangeV dictionary
                 if self.analog_value in val:          # Check if the analog_value is in the range of values
                     self.numRange = key                # Set the value of numRange to the corresponding key
-                print(self.numRange)                   # Print the value of numRange
+                # print(self.numRange)                   # Print the value of numRange
 
             time.sleep(0.75) 
 
 
+blink_on = False
+class blink():  
+    def __init__(self):
+        self.LEDstate = None     
+    def run(self):
+        def go_blink():
+            
+            global blink_on
+            if blink_on:
+                Bled.off()
+                Gled.off()
+                self.LEDstate = "OFF"
+                
+            else:
+                Bled.blink(0.5, 0.5)
+                time.sleep(0.5)
+                Gled.blink(0.5, 0.5)
+                self.LEDstate = "ON" 
+                
+
+            blink_on = not blink_on
+
+        button = gpio.Button(4)
+        Bled = gpio.LED(17)
+        Gled = gpio.LED(27)
+
+        try:
+            button.when_pressed = go_blink
+            
+            pause()
+
+        finally:
+            Bled.close()
+            Gled.close()
+            
+            pass
 
 
 
@@ -110,46 +146,6 @@ class SSDisplay(gpio.LEDBoard):
 
 if __name__ == '__main__':  # Check if the script is being run directly
     myPoo = readPotentiometer()  
+    myblink = blink()
+    myblink.run()
     myPoo.run_analog()  
-
-    # seven_seg = SSDisplay(16, 12, 19, 13, 26, 21, 20, active_high=False)  # Create an instance of the SSDisplay class with the specified pins
-    # time.sleep(5)
-    # seven_seg.display("9")  # Call the display method of the SSDisplay instance with the character "9"
-    # time.sleep(3)
-
-
-
-
-
-
-
-# blink_on = False
-# class blink():
-#     def __init__(self):
-#         self.LEDstate = None
-#     def go_blink(self):
-#         led = gpio.LED(17)
-#         global blink_on
-#         if blink_on:
-#             led.off()
-            
-#         else:
-#             led.blink(0.5, 0.5)
-#             time.sleep(0.5)
-
-#         blink_on = not blink_on
-#         if not blink_on:
-#             self.state = "OFF"
-#         else:
-#             self.state = "ON" 
-
-#     button = gpio.Button(27)
-
-#     try:
-#         button.when_pressed = go_blink
-        
-#         pause()
-
-#     finally:
-#         pass
-
