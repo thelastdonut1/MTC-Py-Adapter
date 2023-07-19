@@ -14,6 +14,7 @@ import time
 import distro 
 import random
 from blink import SSDisplay, readPotentiometer, blink
+from machine import Gcode
 import threading
 
 class Device:
@@ -30,6 +31,11 @@ class Device:
         self.analog = self._reader.numRange            # Set the analog attribute to the numRange value of _reader
         self.state = blink()                           # Create an instance of blink and assign it to the state attribute
         self.light_blink = self.state.LEDstate                  # Set the ON attribute to the LEDstate value of state
+        self._parser = Gcode()
+        self.X_Axis = self._parser.X_Axis
+        self.Y_Axis = self._parser.Y_Axis
+        self.command = self._parser.command
+        self.comment = self._parser.comment
 
     def shuffle_display(self):
         while True:
@@ -37,6 +43,11 @@ class Device:
             self.digit = self._display.AdapterSend      # Set the digit attribute to the AdapterSend value of _display
             self.analog = self._reader.numRange         # Set the analog attribute to the numRange value of _reader
             self.light_blink = self.state.LEDstate
+
+            self.X_Axis = self._parser.X_Axis
+            self.Y_Axis = self._parser.Y_Axis
+            self.command = self._parser.command
+            self.comment = self._parser.comment
             time.sleep(0.05)
 
     def getUser(self):
@@ -63,9 +74,11 @@ class Device:
         threadSSD = threading.Thread(target=self.shuffle_display, args=())   # Create a thread for shuffle_display method
         threadANA = threading.Thread(target=self._reader.run_analog, args=()) # Create a thread for run_analog method of _reader
         threadBLINK = threading.Thread(target=self.state.run, args=())  # Create a thread for go_blink method of state
+        threadMACH = threading.Thread(target=self._parser.Parser, args=())
         threadSSD.start()                                 # Start the thread for shuffle_display
         threadANA.start()                                 # Start the thread for run_analog
         threadBLINK.start()                               # Start the thread for go_blink
+        threadMACH.start()
         while True:
             self.getUser()                                # Update the user attribute
             self.getCursorX()                             # Update the cursorX attribute
