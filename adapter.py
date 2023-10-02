@@ -35,7 +35,7 @@ class Adapter:
         self.SHDRString = self.formSHDRString() # Forms the SHDR String for the data sample that will be sent to the agent
 
         self.port = 7878    # Port that the adapter will send data from
-        self.IPAddress = socket.gethostbyname(socket.gethostname()) # IP Adrress that the adapter will send data from
+        self.IPAddress = "192.168.119.1" # IP Adrress that the adapter will send data from
 
         self.socket = Server(self.port, self.IPAddress) # Socket at [IPAddress:Port]
 
@@ -44,6 +44,22 @@ class Adapter:
         #TODO: Add this attribute to all classes for easy logging
         self.logger = logging.getLogger('adapterLog')
 
+    def updateExecution(self):
+        # Update Execution 
+        self.device.execution = "Active"  
+
+    def updateControllerMode(self):
+        # Update ControllerMode 
+        self.device.controller_mode = "Automatic"
+
+    def updateProgram(self):
+        #Update pgm
+        self.device.mainprogram = "PART-COUNT-MC"
+
+    def updateProgramComment(self):
+        #Update pcmt
+        self.programComment = "PART COUNTER DEMO PROGRAM"
+        
     # Runs the adapter and performs the device reading, filtering, SHDR formation, and sending at a specified interval
     def run(self):
         # Checks if log file has content. If not, creates new log file. Passes self for properties in log file.
@@ -52,9 +68,12 @@ class Adapter:
         
         self.logger.info('Adapter has been started.')
 
+        # Update Availability to AVAILABLE
+        self.device.availability = "AVAILABLE"
+
         while self.device.status == "running":
             self.checkConnection()
-            while self.connected:
+            while self.connected:                
                 self.readDevice()
                 self.filterData()
                 self.formSHDRString()
@@ -88,13 +107,49 @@ class Adapter:
                 if self.currentDataSample[i].value != self.previousDataSample[i].value: # If the currentDataSample value with index i does not match the previousDataSample value with index i, changed the "has_changed" attr to True
                     self.currentDataSample[i].has_changed = True
 
-    # Formats the data into a list of 'SHDRStrings' and adds the SHDRTime to the beginning of the list. Use the form_SHDR_String method to generate the complete string to send to the agent
+   # Forms the SHDRString and data items for sending to the agent.
     def formSHDRString(self) -> str:
         SHDRTime = datetime.utcnow().isoformat() + "Z"
-        SHDRStringsList = [SHDRTime]
+        SHDRStringsList = [SHDRTime] # Initializes a list to store SHDR strings, starting with the timestamp
+
+        # Clear the adapterData list before adding new data items
+        self.adapterData.clear()
+
+        # Add Availability data item to the adapter data
+        availability_data = Data("avail", self.device.availability)
+        self.adapterData.append(availability_data)
+
+        # Add ControllerMode data item to the adapter data
+        controller_mode_data = Data("mode", self.device.controller_mode)
+        self.adapterData.append(controller_mode_data)
+
+        # Add Execution data item to the adapter data
+        execution_data = Data("execution", self.device.execution)
+        self.adapterData.append(execution_data)
+
+        # Add Program data item to the adapter data
+        program_data = Data("program", self.device.mainprogram)
+        self.adapterData.append(program_data)
+
+        # Add programComment data item to the adapter data
+        programComment_data = Data("program_cmt", self.device.programComment)
+        self.adapterData.append(programComment_data)
+
+        #Add PartCountAct data item to the adapterData
+        PartCountAct_data = Data("PartCountAct", self.device.PartCountAct)
+        self.adapterData.append(PartCountAct_data)
+
+        # Update "AO" keys in adapterData based on currentDataSample
+        # for data in self.currentDataSample:
+        #     if data.key.startswith("AO"):
+        #         self.adapterData.append(data)
+
+        # Create SHDR strings for all data items in adapterData
         for data in self.adapterData:
             string = data.SHDRFormat()
             SHDRStringsList.append(string)
+
+        # Concatenate all the SHDR strings to form the final SHDRString
         SHDRString = ''.join(SHDRStringsList)
         self.SHDRString = SHDRString + '\n'
 
@@ -115,9 +170,16 @@ class Adapter:
 
     # Checks for any connections to the adapter. Changes connection status
     def checkConnection(self):
+       # Set the Availability status to "AVAILABLE" when there are active connections.
         if self.socket.active_connections:
             self.connected = True
+            self.device.availability = "AVAILABLE"
+            self.logger.info("Connection established. Availability: %s", self.device.availability)
+            # print("Connection established. Availability:", self.device.availability)
         else:
             self.connected = False
+            self.device.availability = "UNAVAILABLE"
+            self.logger.info("No active connections. Availability: %s", self.device.availability)
+
 
 
