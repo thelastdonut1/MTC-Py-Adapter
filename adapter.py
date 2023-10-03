@@ -35,7 +35,7 @@ class Adapter:
         self.SHDRString = self.formSHDRString() # Forms the SHDR String for the data sample that will be sent to the agent
 
         self.port = 7878    # Port that the adapter will send data from
-        self.IPAddress = "192.168.119.1" # IP Adrress that the adapter will send data from
+        self.IPAddress = socket.gethostbyname(socket.gethostname()) # IP Adrress that the adapter will send data from
 
         self.socket = Server(self.port, self.IPAddress) # Socket at [IPAddress:Port]
 
@@ -73,6 +73,7 @@ class Adapter:
 
         while self.device.status == "running":
             self.checkConnection()
+            time.sleep(1)
             while self.connected:                
                 self.readDevice()
                 self.filterData()
@@ -174,12 +175,12 @@ class Adapter:
         if self.socket.active_connections:
             self.connected = True
             self.device.availability = "AVAILABLE"
-            self.logger.info("Connection established. Availability: %s", self.device.availability)
+            # self.logger.info("Connection established. Availability: %s", self.device.availability)
             # print("Connection established. Availability:", self.device.availability)
         else:
             self.connected = False
             self.device.availability = "UNAVAILABLE"
-            self.logger.info("No active connections. Availability: %s", self.device.availability)
+            # self.logger.info("No active connections. Availability: %s", self.device.availability)
 
 
 
