@@ -21,6 +21,11 @@ class Device:
         self.availability = "UNAVAILABLE"  # Initialize availability as "UNAVAILABLE"
         self.mainprogram = "program" # Initialize the main program
         self.programComment = "program_cmt" # Initialize the program comment
+        self.Tool_number = 0
+        self.pallet_num = 0
+        self.Frapidovr = 100
+        self.Sovr = 100
+        self.Fovr = 100
         self.PartCountAct = 0 # Initialize PartCountAct
 
         #Initialize a dictionary called cycle_counters
@@ -69,6 +74,12 @@ class Device:
 
             #Update program comment randomly
             self.programComment = random.choice(["PART COUNTER DEMO PROGRAM REV-02D","MTCONNECT TEST. SPINDLE OVERRIDES"])
+
+            #Update Tool_number randomly between values 1 - 999
+            self.Tool_number = random.randrange(1,999)
+
+            #Update the pallet_number randomly between values 0 - 9999
+            self.pallet_num = random.randrange(0,999)
  
             # Increment PartCountAct based on cycling attributes
             self.update_part_count_act()

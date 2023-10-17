@@ -35,7 +35,7 @@ class Adapter:
         self.SHDRString = self.formSHDRString() # Forms the SHDR String for the data sample that will be sent to the agent
 
         self.port = 7878    # Port that the adapter will send data from
-        self.IPAddress = socket.gethostbyname(socket.gethostname()) # IP Adrress that the adapter will send data from
+        self.IPAddress = self.get_ethernet_ip() # IP Adrress that the adapter will send data from
 
         self.socket = Server(self.port, self.IPAddress) # Socket at [IPAddress:Port]
 
@@ -43,6 +43,22 @@ class Adapter:
 
         #TODO: Add this attribute to all classes for easy logging
         self.logger = logging.getLogger('adapterLog')
+    # Method to get the Ethernet IP    
+    def get_ethernet_ip(self):
+        try:
+            # Create a temporary socket connection to a remote server
+            temp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            temp_socket.settimeout(0.1)  # Set a short timeout for the connection attempt
+
+            # Try to connect to a known external host (Google's DNS server) to determine the local IP address
+            temp_socket.connect(("8.8.8.8", 80))
+            local_ip = temp_socket.getsockname()[0]
+
+            temp_socket.close()
+            return local_ip
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            return "UNAVAILABLE"
 
     def updateExecution(self):
         # Update Execution 
@@ -135,6 +151,26 @@ class Adapter:
         # Add programComment data item to the adapter data
         programComment_data = Data("program_cmt", self.device.programComment)
         self.adapterData.append(programComment_data)
+
+        #Add Tool_number data item to the adapter data
+        ToolNumber_data = Data("Tool_number", self.device.Tool_number)
+        self.adapterData.append(ToolNumber_data)
+
+         #Add pallet_num data item to the adapterData
+        pallet_num_data = Data("pallet_num", self.device.pallet_num)
+        self.adapterData.append(pallet_num_data)
+
+        #Add Frapidovr data item to the adapterData
+        Frapidovr_data = Data("Frapidovr", self.device.Frapidovr)
+        self.adapterData.append(Frapidovr_data)
+
+        #Add Sovr data item to the adapterData
+        Sovr_data = Data("Sovr", self.device.Sovr)
+        self.adapterData.append(Sovr_data)
+
+        #$Add Fovr data item to the adapterData
+        Fovr_data = Data("Fovr", self.device.Fovr)
+        self.adapterData.append(Fovr_data)
 
         #Add PartCountAct data item to the adapterData
         PartCountAct_data = Data("PartCountAct", self.device.PartCountAct)
