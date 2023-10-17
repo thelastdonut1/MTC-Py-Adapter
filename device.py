@@ -21,11 +21,11 @@ class Device:
         self.availability = "UNAVAILABLE"  # Initialize availability as "UNAVAILABLE"
         self.mainprogram = "program" # Initialize the main program
         self.programComment = "program_cmt" # Initialize the program comment
-        self.Tool_number = 0
-        self.pallet_num = 0
-        self.Frapidovr = 100
-        self.Sovr = 100
-        self.Fovr = 100
+        self.Tool_number = 0 #Initialize the tool #
+        self.pallet_num =  0 #Initialize the pallet #
+        self.Frapidovr = 100 #Initialize the rapid ovr
+        self.Sovr = 100 #Initialize the spindle ovr
+        self.Fovr = 100 # Initialize feedrate ovr
         self.PartCountAct = 0 # Initialize PartCountAct
 
         #Initialize a dictionary called cycle_counters
